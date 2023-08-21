@@ -1,30 +1,35 @@
 import { useState } from "react";
 import { Form, Button } from "react-bootstrap";
 import { useFormik } from "formik";
+import '../css/step1.css';
 
 const Step1 = ({ nextStep }) => {
   const [monthlyRepay, setMonthlyRepay] = useState(0);
   const [totalRepay, setTotalRepay] = useState(0);
   const [interestRate, setInterestRate] = useState(0);
+  const [interestAmount, setInterestAmount] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
 
   const calculateLoan = (array) => {
     // console.log({ array });
-    setInterestRate(4.2);
+    setInterestRate(array.interestrate); 
     const pv = parseInt(array.amount);
-    const r = 4.2 / 1200;
+    const r = array.interestrate / 1200;
     const n = parseInt(array.term);
     const p = (r * pv) / (1 - Math.pow(1 + r, -n));
+    
     console.log({ pv, n, r, p });
-    setMonthlyRepay(Math.floor(p));
-    setTotalRepay(Math.floor(p * n));
+    setMonthlyRepay(p.toFixed(2));
+    setTotalRepay((p * n).toFixed(2));
     setIsVisible(true);
+    setInterestAmount(((p * n) - array.amount).toFixed(2));
   };
 
   const formik = useFormik({
     initialValues: {
       amount: 0,
       term: "",
+      interestrate: 0
     },
     onSubmit: (values, { resetForm }) => {
       console.log({ values });
@@ -44,6 +49,8 @@ const Step1 = ({ nextStep }) => {
             <Form.Control
               type="number"
               name="amount"
+              min={1000}
+              max={10000000}
               required
               value={formik.values.amount}
               onChange={formik.handleChange}
@@ -70,6 +77,16 @@ const Step1 = ({ nextStep }) => {
 
               <option value="60">60 months</option>
             </Form.Control>
+            <Form.Group controlId="forInterestrate">
+            <Form.Label>Interest Rate</Form.Label>
+            <Form.Control
+              type="number"
+              name="interestrate"
+              required
+              value={formik.values.interestrate}
+              onChange={formik.handleChange}
+            />
+          </Form.Group>
           </Form.Group>
 
           <Button className="my-2" variant="primary" type="submit">
@@ -79,15 +96,19 @@ const Step1 = ({ nextStep }) => {
         <div className="card p-3 w-100 m-1">
           <div className="d-flex my-3 justify-content-between gap-2 align-items-center">
             <span>Monthly Repay:</span>
-            <span>{monthlyRepay}</span>
+            <span>£{monthlyRepay}</span>
           </div>
           <div className="d-flex my-3 justify-content-between gap-2 align-items-center">
-            <span>Totla Repay:</span>
-            <span>{totalRepay}</span>
+            <span>Total Repay:</span>
+            <span>£{totalRepay}</span>
+          </div>
+          <div className="d-flex my-3 justify-content-between gap-2 align-items-center">
+            <span>Interest Amount:</span>
+            <span>£{interestAmount}</span>
           </div>
           <div className="d-flex my-3 justify-content-between gap-2 align-items-center">
             <span>Interest Rate:</span>
-            <span>{interestRate} %</span>
+            <span>{interestRate}%</span>
           </div>
         </div>
       </div>
